@@ -10,7 +10,8 @@ type Props = {
 
 const Grid = ({rows, cols}:Props) => {
     const [grid, setGrid] = useState<CellRow[]>([])
-
+    const [start, setStart] = useState<Cell | null>(null)
+    const [finish, setFinish] = useState<Cell | null>(null)
 
     const createGrid = useCallback(() => {
         const cellRows: CellRow[] = []
@@ -38,15 +39,30 @@ const Grid = ({rows, cols}:Props) => {
         createGrid()
     },[ createGrid])
 
+    const onCellClicked = (cell: Cell) => {
+        // alert(`${cell.x}-${cell.y} is clicked`)
+        const item = grid.find(f => f.y === cell.y)?.cells.find(c => c.x === cell.x)
+        if(!item) return
+        
+        if(!start){
+            item.isStart = true
+            setStart(cell)
+        } 
+        else if(!finish){
+            item.isFinish = true
+            setFinish(cell)
+        } 
+        else item.isObstacle = true
+        setGrid([...grid])
+    }
+
     
       return(        
         <div>
             {grid.map(r => (
                 <div key={r.y} style={{ display: 'flex' }}>
                     {r.cells.map(c => (
-                        <div>
-                            <CellBox key={c.x} cell={c} />
-                        </div>
+                        <CellBox key={c.x} cell={c} onCellClicked={onCellClicked}/>
                     ))}
                 </div>
             ))}

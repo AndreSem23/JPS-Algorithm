@@ -2,9 +2,10 @@ import Cell from "../types/Cell"
 
 type Props = {
     cell: Cell
+    onCellClicked: (c: Cell) => void
 }
 
-const CellBox = ({cell}:Props) => {
+const CellBox = ({cell, onCellClicked}:Props) => {
 
     const determineClass = (cell: Cell) => {
         if(cell.isObstacle) return 'black'
@@ -15,7 +16,7 @@ const CellBox = ({cell}:Props) => {
 
     return (
         <div
-            onClick={() => alert(`${cell.x}-${cell.y} is clicked`)}
+            onClick={() => onCellClicked(cell)}
             style={{
                 width: `${(window.innerHeight-50)/20}px`,
                 height: `${(window.innerHeight-50)/20}px`,
