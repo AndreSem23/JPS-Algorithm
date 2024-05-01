@@ -1,24 +1,16 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Col, Row } from 'react-bootstrap';
+import Grid from './Grid/Grid';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='m-2'>
+      
+      <Row className='mb-2 justify-content-center'>
+        <Col xs='auto'>
+          <Grid rows={20} cols={20}/>
+        </Col>
+      </Row>
+        
     </div>
   );
 }
