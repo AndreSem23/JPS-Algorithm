@@ -2,10 +2,11 @@ import Cell from "../types/Cell"
 
 type Props = {
     cell: Cell
-    onCellClicked: (c: Cell) => void
+    matrixSize: number
+    onCellClicked: (c: Cell) => void    
 }
 
-const CellBox = ({cell, onCellClicked}:Props) => {
+const CellBox = ({cell, matrixSize, onCellClicked}:Props) => {
 
     const determineClass = (cell: Cell) => {
         if(cell.isObstacle) return 'black'
@@ -18,9 +19,12 @@ const CellBox = ({cell, onCellClicked}:Props) => {
         <div
             onClick={() => onCellClicked(cell)}
             style={{
-                width: `${(window.innerHeight-50)/20}px`,
-                height: `${(window.innerHeight-50)/20}px`,
-                border: '1px solid black',
+                width: `${(0.97*window.innerHeight)/matrixSize}px`,
+                height: `${(0.97*window.innerHeight)/matrixSize}px`,
+                borderTop: '1px solid black',
+                borderLeft: '1px solid black',
+                borderRight: cell.x === matrixSize ? '1px solid black': '',
+                borderBottom: cell.y === matrixSize ? '1px solid black': '',
                 backgroundColor: `${determineClass(cell)}`,
             }}
         />
