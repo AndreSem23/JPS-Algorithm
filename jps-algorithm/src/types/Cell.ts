@@ -1,5 +1,4 @@
 export default interface Cell {
-    id: number
     x: number
     y: number
     isObstacle: boolean

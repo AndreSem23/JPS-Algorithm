@@ -18,7 +18,6 @@ const Grid = ({size}:Props) => {
             const cells: Cell[] = []
             for (let x = 1; x <= size; x++) {
                 const cell: Cell = {
-                    id: y*x,
                     x: x,
                     y: y,
                     isObstacle: false,
