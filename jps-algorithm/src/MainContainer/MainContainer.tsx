@@ -9,7 +9,7 @@ const MainContainer = () => {
     return (
         <>
             <Row className='m-2 justify-content-between' >
-                <Col xs='auto'>
+                <Col md='3'>
                     <Row className="mb-2">
                         <Col>
                             <Form.Label>Size</Form.Label>
@@ -21,14 +21,11 @@ const MainContainer = () => {
                     </Row>  
                     <Row className="m-2 justify-content-between" >
                         <Col xs='auto'>
-                            <Button onClick={() => setSize(sliderValue)}>Reuild</Button>
-                        </Col>
-                        <Col xs='auto'>
-                            <Button variant="success" onClick={() => console.log("Run")}>Start search</Button>
+                            <Button onClick={() => setSize(sliderValue)}>Create</Button>
                         </Col>
                     </Row>              
                 </Col>
-                <Col xs='auto'>
+                <Col md='9'>
                     <Grid size={size}/>
                 </Col>
             </Row>
