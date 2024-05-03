@@ -70,7 +70,7 @@ const Grid = ({size}:Props) => {
         cell.gScore = g
         const h = ((cell.x - finish.x)**2 + (cell.y - finish.y)**2)**0.5
         cell.hScore = h
-        return g + h
+        return Math.round((g + h)*100)/100
     }
 
     const addToOpenList = (cell:Cell,  parent: Cell) => {
@@ -86,6 +86,7 @@ const Grid = ({size}:Props) => {
         while (true){
             const right = grid.find(f => f.y === cell.y)?.cells.find(c => c.x === cell.x + step)
             if(!right) break
+            right.parent = cell
             if(right.isFinish) return right
             if(right.isClosed || right.isOpen || right.isObstacle || right.isStart) break
 
@@ -93,9 +94,9 @@ const Grid = ({size}:Props) => {
             if(top && top.isObstacle){
                 const topRight = grid.find(f => f.y === right.y-1)?.cells.find(c => c.x === right.x+1)                
                 if(topRight && !topRight.isObstacle && !topRight.isClosed && !topRight.isOpen){
-                    addToOpenList(right, cell) //potential error
-                    addToOpenList(topRight, cell)
-                    if(topRight.isFinish) return topRight
+                    addToOpenList(right, cell)
+                    addToOpenList(topRight, right)
+                    if(topRight.isFinish) {topRight.parent = cell; return topRight}
                 }
             }
 
@@ -103,9 +104,9 @@ const Grid = ({size}:Props) => {
             if(bottom && bottom.isObstacle){
                 const bottomRight = grid.find(f => f.y === right.y+1)?.cells.find(c => c.x === right.x+1)
                 if(bottomRight && !bottomRight.isObstacle && !bottomRight.isClosed && !bottomRight.isOpen){
-                    addToOpenList(right, cell) //potential error
-                    addToOpenList(bottomRight, cell)
-                    if(bottomRight.isFinish) return bottomRight
+                    addToOpenList(right, cell) 
+                    addToOpenList(bottomRight, right)
+                    if(bottomRight.isFinish) {bottomRight.parent = cell; return bottomRight}
                 }
             }
             right.isClosed = true
@@ -116,16 +117,17 @@ const Grid = ({size}:Props) => {
         while (true){
             const left = grid.find(f => f.y === cell.y)?.cells.find(c => c.x === cell.x - stepBack)
             if(!left) break
-            if(left.isFinish) return left
+            left.parent = cell
+            if(left.isFinish)  return left
             if(left.isClosed || left.isOpen || left.isObstacle || left.isStart) break
 
             const top = grid.find(f => f.y === left.y-1)?.cells.find(c => c.x === left.x)
             if(top && top.isObstacle){
                 const topLeft = grid.find(f => f.y === left.y-1)?.cells.find(c => c.x === left.x-1)
                 if(topLeft && !topLeft.isObstacle && !topLeft.isClosed && !topLeft.isOpen){
-                    addToOpenList(left, cell) //potential error
-                    addToOpenList(topLeft, cell)
-                    if(topLeft.isFinish) return topLeft
+                    addToOpenList(left, cell) 
+                    addToOpenList(topLeft, left)
+                    if(topLeft.isFinish) {topLeft.parent = cell; return topLeft}
                 }
             }
 
@@ -133,9 +135,9 @@ const Grid = ({size}:Props) => {
             if(bottom && bottom.isObstacle){
                 const bottomLeft = grid.find(f => f.y === left.y+1)?.cells.find(c => c.x === left.x-1)
                 if(bottomLeft && !bottomLeft.isObstacle && !bottomLeft.isClosed && !bottomLeft.isOpen){
-                    addToOpenList(left, cell) //potential error
-                    addToOpenList(bottomLeft, cell)
-                    if(bottomLeft.isFinish) return bottomLeft
+                    addToOpenList(left, cell) 
+                    addToOpenList(bottomLeft, left)
+                    if(bottomLeft.isFinish) {bottomLeft.parent = cell; return bottomLeft}
                 }
             }
             left.isClosed = true
@@ -149,16 +151,17 @@ const Grid = ({size}:Props) => {
         while (true){
             const top = grid.find(f => f.y === cell.y-stepUp)?.cells.find(c => c.x === cell.x)            
             if(!top) break
-            if(top.isFinish) return top
+            top.parent = cell
+            if(top.isFinish)  return top
             if(top.isClosed || top.isOpen || top.isObstacle || top.isStart) break
 
             const right = grid.find(f => f.y === top.y)?.cells.find(c => c.x === top.x+1)
             if(right && right.isObstacle){
                 const rightTop = grid.find(f => f.y === top.y-1)?.cells.find(c => c.x === top.x+1)
                 if(rightTop && !rightTop.isObstacle && !rightTop.isClosed && !rightTop.isOpen){
-                    addToOpenList(top, cell) //potential error
-                    addToOpenList(rightTop, cell)
-                    if(rightTop.isFinish) return rightTop
+                    addToOpenList(top, cell)
+                    addToOpenList(rightTop, top)
+                    if(rightTop.isFinish) {rightTop.parent = top; return rightTop}
                 }
             }
 
@@ -166,9 +169,9 @@ const Grid = ({size}:Props) => {
             if(left && left.isObstacle){
                 const leftTop = grid.find(f => f.y === top.y-1)?.cells.find(c => c.x === top.x-1)
                 if(leftTop && !leftTop.isObstacle && !leftTop.isClosed && !leftTop.isOpen){
-                    addToOpenList(top, cell) //potential error
-                    addToOpenList(leftTop, cell)
-                    if(leftTop.isFinish) return leftTop
+                    addToOpenList(top, cell)
+                    addToOpenList(leftTop, top)
+                    if(leftTop.isFinish) {leftTop.parent = top; return leftTop}
                 }
             }
             top.isClosed = true
@@ -179,16 +182,18 @@ const Grid = ({size}:Props) => {
         while (true){
             const bottom = grid.find(f => f.y === cell.y+stepDown)?.cells.find(c => c.x === cell.x)
             if(!bottom) break
-            if(bottom.isFinish) return bottom
+            bottom.parent = cell
+            if(bottom.isFinish)  return bottom
             if(bottom.isClosed || bottom.isOpen || bottom.isObstacle || bottom.isStart) break
 
             const right = grid.find(f => f.y === bottom.y)?.cells.find(c => c.x === bottom.x + 1)
+            if(right) right.parent = cell;
             if(right && right.isObstacle){
                 const rightBottom = grid.find(f => f.y === bottom.y+1)?.cells.find(c => c.x === bottom.x+1)                
                 if(rightBottom && !rightBottom.isObstacle && !rightBottom.isClosed && !rightBottom.isOpen){
-                    addToOpenList(bottom, cell) //potential error
-                    addToOpenList(rightBottom, cell)
-                    if(rightBottom.isFinish) return rightBottom
+                    addToOpenList(bottom, cell)
+                    addToOpenList(rightBottom, bottom)
+                    if(rightBottom.isFinish) {rightBottom.parent = right; return rightBottom}
                 }
             }
 
@@ -196,9 +201,9 @@ const Grid = ({size}:Props) => {
             if(left && left.isObstacle){
                 const leftBottom = grid.find(f => f.y === bottom.y+1)?.cells.find(c => c.x === bottom.x-1)                
                 if(leftBottom && !leftBottom.isObstacle && !leftBottom.isClosed && !leftBottom.isOpen){
-                    addToOpenList(bottom, cell) //potential error
-                    addToOpenList(leftBottom, cell)
-                    if(leftBottom.isFinish) return leftBottom
+                    addToOpenList(bottom, cell)
+                    addToOpenList(leftBottom, bottom)
+                    if(leftBottom.isFinish) {leftBottom.parent = bottom; return leftBottom}
                 }
             }
             bottom.isClosed = true
@@ -208,7 +213,7 @@ const Grid = ({size}:Props) => {
     }
 
     const moveDiagonal = (cell: Cell) => {
-        const tr = grid.find(f => f.y === cell.y-1)?.cells.find(c => c.x === cell.x+1)   
+        const tr = grid.find(f => f.y === cell.y-1)?.cells.find(c => c.x === cell.x+1) 
         const tl = grid.find(f => f.y === cell.y-1)?.cells.find(c => c.x === cell.x-1)   
         const br = grid.find(f => f.y === cell.y+1)?.cells.find(c => c.x === cell.x+1)
         const bl = grid.find(f => f.y === cell.y+1)?.cells.find(c => c.x === cell.x-1)
@@ -229,6 +234,7 @@ const Grid = ({size}:Props) => {
                 if(topRight && !topRight.isObstacle && !topRight.isClosed && !topRight.isOpen){
                     topRight.direction = '/'
                     topRight.isClosed = true
+                    addToOpenList(topRight, cell)
                     return topRight
                 }   
             }
@@ -238,6 +244,7 @@ const Grid = ({size}:Props) => {
                 if(bottomRight && !bottomRight.isObstacle && !bottomRight.isClosed && !bottomRight.isOpen){
                     bottomRight.direction = '\\'
                     bottomRight.isClosed = true
+                    addToOpenList(bottomRight, cell)
                     return bottomRight
                 }
             }
@@ -245,11 +252,12 @@ const Grid = ({size}:Props) => {
         //left
         else{
             //top
-            if(f_tr < f_br){
+            if(f_tl < f_bl){
                 const topLeft = grid.find(f => f.y === cell.y-1)?.cells.find(c => c.x === cell.x-1)                
                 if(topLeft && !topLeft.isObstacle && !topLeft.isClosed && !topLeft.isOpen){
                     topLeft.direction = '\\'
                     topLeft.isClosed = true
+                    addToOpenList(topLeft, cell)
                     return topLeft
                 }
             }
@@ -259,6 +267,7 @@ const Grid = ({size}:Props) => {
                 if(bottomLeft && !bottomLeft.isObstacle && !bottomLeft.isClosed && !bottomLeft.isOpen){
                     bottomLeft.direction = '/'
                     bottomLeft.isClosed = true
+                    addToOpenList(bottomLeft, cell)
                     return bottomLeft
                 }
             }
@@ -303,9 +312,13 @@ const Grid = ({size}:Props) => {
                 if(result) break
                 result = searchVertically(node)
                 if(result) break
-                node = moveDiagonal(node)
+                let point = moveDiagonal(node)
+                if(point && point.isFinish) {point.parent = node; result = point; break}
+                node = point
             }
+            if(result) break
         }
+        alert(result ? 'Success' : 'Not found')
         if(result) showPath(result)
         setGrid([...grid])
     }
