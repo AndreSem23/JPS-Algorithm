@@ -9,12 +9,12 @@ type Props = {
 const CellBox = ({cell, matrixSize, onCellClicked}:Props) => {
 
     const determineClass = (cell: Cell) => {
-        if(cell.isPath) return 'blue'
+        if(cell.isPath) return '#ffbe2e'
         if(cell.isObstacle) return 'black'
-        if(cell.isClosed) return 'gray'
-        if(cell.isStart) return 'green'
-        if(cell.isFinish) return 'red'
-        if(cell.isOpen) return 'yellow'        
+        if(cell.isClosed) return 'lightgray'
+        if(cell.isStart) return '#1a4480'
+        if(cell.isFinish) return 'green'
+        if(cell.isOpen) return '#caa3bb'        
     }
 
     return (

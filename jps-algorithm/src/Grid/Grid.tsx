@@ -84,6 +84,7 @@ const Grid = ({size}:Props) => {
     const searchHorizontaly = (cell:Cell) => {
         let step = 1
         while (true){
+            // eslint-disable-next-line no-loop-func
             const right = grid.find(f => f.y === cell.y)?.cells.find(c => c.x === cell.x + step)
             if(!right) break
             right.parent = cell
@@ -115,6 +116,7 @@ const Grid = ({size}:Props) => {
         }
         let stepBack = 1
         while (true){
+            // eslint-disable-next-line no-loop-func
             const left = grid.find(f => f.y === cell.y)?.cells.find(c => c.x === cell.x - stepBack)
             if(!left) break
             left.parent = cell
@@ -149,6 +151,7 @@ const Grid = ({size}:Props) => {
     const searchVertically = (cell:Cell) => {        
         let stepUp = 1
         while (true){
+            // eslint-disable-next-line no-loop-func
             const top = grid.find(f => f.y === cell.y-stepUp)?.cells.find(c => c.x === cell.x)            
             if(!top) break
             top.parent = cell
@@ -180,6 +183,7 @@ const Grid = ({size}:Props) => {
         }
         let stepDown = 1
         while (true){
+            // eslint-disable-next-line no-loop-func
             const bottom = grid.find(f => f.y === cell.y+stepDown)?.cells.find(c => c.x === cell.x)
             if(!bottom) break
             bottom.parent = cell
@@ -275,8 +279,10 @@ const Grid = ({size}:Props) => {
     }
 
     const showPath = (cell: Cell) => {
+        if(cell.isStart) return
         cell.isPath = true
-        if(cell.parent) showPath(cell.parent)
+        if(!cell.parent) return
+        showPath(cell.parent)
     }
 
     const algo = () => {
@@ -319,7 +325,7 @@ const Grid = ({size}:Props) => {
             if(result) break
         }
         alert(result ? 'Success' : 'Not found')
-        if(result) showPath(result)
+        if(result && result.parent) showPath(result.parent)
         setGrid([...grid])
     }
 
