@@ -218,7 +218,7 @@ const Grid = ({size}:Props) => {
 
     const moveDiagonal = (cell: Cell) => {
         const tr = getNeighbor(cell, 1, -1)
-        if(tr && !tr.isObstacle && !tr.isClosed && !tr.isOpen){
+        if(tr && !tr.isObstacle && !tr.isClosed && !tr.isOpen && !tr.isStart){
             tr.direction = '/'
             tr.isClosed = true
             addToOpenList(tr, cell)
@@ -226,7 +226,7 @@ const Grid = ({size}:Props) => {
         }  
 
         const br = getNeighbor(cell, 1, 1)
-        if(br && !br.isObstacle && !br.isClosed && !br.isOpen){
+        if(br && !br.isObstacle && !br.isClosed && !br.isOpen && !br.isStart){
             br.direction = '\\'
             br.isClosed = true
             addToOpenList(br, cell)
@@ -234,7 +234,7 @@ const Grid = ({size}:Props) => {
         }
 
         const tl = getNeighbor(cell, -1, -1)  
-        if(tl && !tl.isObstacle && !tl.isClosed && !tl.isOpen){
+        if(tl && !tl.isObstacle && !tl.isClosed && !tl.isOpen && !tl.isStart){
             tl.direction = '\\'
             tl.isClosed = true
             addToOpenList(tl, cell)
@@ -242,7 +242,7 @@ const Grid = ({size}:Props) => {
         }
 
         const bl = getNeighbor(cell, -1, 1)
-        if(bl && !bl.isObstacle && !bl.isClosed && !bl.isOpen){
+        if(bl && !bl.isObstacle && !bl.isClosed && !bl.isOpen && !bl.isStart){
             bl.direction = '/'
             bl.isClosed = true
             addToOpenList(bl, cell)
@@ -251,10 +251,15 @@ const Grid = ({size}:Props) => {
     }
 
     const showPath = (cell: Cell) => {
-        if(cell.isStart) return
-        cell.isPath = true
-        if(!cell.parent) return
-        showPath(cell.parent)
+        let parent = cell.parent
+        let i = 1
+        while(i < size*size){
+            i += 1
+            if(!parent || parent.isStart) break
+            parent.isPath = true
+            let new_parent = parent.parent
+            parent = new_parent
+        }
     }
 
     const algo = () => {
