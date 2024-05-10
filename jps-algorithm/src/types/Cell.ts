@@ -8,7 +8,6 @@ export default interface Cell {
     isOpen: boolean
     isPath: boolean
     gScore: number
-    hScore: number
     fScore: number
     parent: Cell | null    
     direction: string
