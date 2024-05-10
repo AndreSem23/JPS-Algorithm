@@ -85,6 +85,11 @@ const Grid = ({size}:Props) => {
         return neighbor
     }
 
+    const isAvailable = (cell:Cell) => {
+        if(cell.isClosed || cell.isOpen || cell.isObstacle || cell.isStart) return false
+        else return true
+    }
+
     const searchHorizontaly = (cell:Cell) => {
         let step = 1
         while (true){
@@ -92,25 +97,25 @@ const Grid = ({size}:Props) => {
             if(!right) break
             right.parent = cell
             if(right.isFinish) return right
-            if(right.isClosed || right.isOpen || right.isObstacle || right.isStart) break
+            if(!isAvailable(right)) break
 
             const top = getNeighbor(right, 0, -1)
             if(top && top.isObstacle){
                 const topRight = getNeighbor(right,1,-1)            
-                if(topRight && !topRight.isObstacle && !topRight.isClosed && !topRight.isOpen){
+                if(topRight && isAvailable(topRight)){
                     addToOpenList(right, cell)
                     addToOpenList(topRight, right)
-                    if(topRight.isFinish) {topRight.parent = cell; return topRight}
+                    if(topRight.isFinish) return topRight
                 }
             }
 
             const bottom = getNeighbor(right,0,1)
             if(bottom && bottom.isObstacle){
                 const bottomRight = getNeighbor(right,1,1)
-                if(bottomRight && !bottomRight.isObstacle && !bottomRight.isClosed && !bottomRight.isOpen){
+                if(bottomRight && isAvailable(bottomRight)){
                     addToOpenList(right, cell) 
                     addToOpenList(bottomRight, right)
-                    if(bottomRight.isFinish) {bottomRight.parent = cell; return bottomRight}
+                    if(bottomRight.isFinish) return bottomRight
                 }
             }
             right.isClosed = true
@@ -123,25 +128,25 @@ const Grid = ({size}:Props) => {
             if(!left) break
             left.parent = cell
             if(left.isFinish)  return left
-            if(left.isClosed || left.isOpen || left.isObstacle || left.isStart) break
+            if(!isAvailable(left)) break
 
             const top = getNeighbor(left,0,-1)
             if(top && top.isObstacle){
                 const topLeft = getNeighbor(left, -1, -1)
-                if(topLeft && !topLeft.isObstacle && !topLeft.isClosed && !topLeft.isOpen){
+                if(topLeft && isAvailable(topLeft)){
                     addToOpenList(left, cell) 
                     addToOpenList(topLeft, left)
-                    if(topLeft.isFinish) {topLeft.parent = cell; return topLeft}
+                    if(topLeft.isFinish) return topLeft
                 }
             }
 
             const bottom = getNeighbor(left, 0, 1)
             if(bottom && bottom.isObstacle){
                 const bottomLeft = getNeighbor(left, -1, 1)
-                if(bottomLeft && !bottomLeft.isObstacle && !bottomLeft.isClosed && !bottomLeft.isOpen){
+                if(bottomLeft && isAvailable(bottomLeft)){
                     addToOpenList(left, cell) 
                     addToOpenList(bottomLeft, left)
-                    if(bottomLeft.isFinish) {bottomLeft.parent = cell; return bottomLeft}
+                    if(bottomLeft.isFinish) return bottomLeft
                 }
             }
             left.isClosed = true
@@ -157,25 +162,25 @@ const Grid = ({size}:Props) => {
             if(!top) break
             top.parent = cell
             if(top.isFinish)  return top
-            if(top.isClosed || top.isOpen || top.isObstacle || top.isStart) break
+            if(!isAvailable(top)) break
 
             const right = getNeighbor(top, 1, 0)
             if(right && right.isObstacle){
                 const rightTop = getNeighbor(top, 1, -1)
-                if(rightTop && !rightTop.isObstacle && !rightTop.isClosed && !rightTop.isOpen){
+                if(rightTop && isAvailable(rightTop)){
                     addToOpenList(top, cell)
                     addToOpenList(rightTop, top)
-                    if(rightTop.isFinish) {rightTop.parent = top; return rightTop}
+                    if(rightTop.isFinish) return rightTop
                 }
             }
 
             const left = getNeighbor(top, -1, 0)
             if(left && left.isObstacle){
                 const leftTop = getNeighbor(top, -1, -1)
-                if(leftTop && !leftTop.isObstacle && !leftTop.isClosed && !leftTop.isOpen){
+                if(leftTop && isAvailable(leftTop)){
                     addToOpenList(top, cell)
                     addToOpenList(leftTop, top)
-                    if(leftTop.isFinish) {leftTop.parent = top; return leftTop}
+                    if(leftTop.isFinish) return leftTop
                 }
             }
             top.isClosed = true
@@ -188,26 +193,26 @@ const Grid = ({size}:Props) => {
             if(!bottom) break
             bottom.parent = cell
             if(bottom.isFinish)  return bottom
-            if(bottom.isClosed || bottom.isOpen || bottom.isObstacle || bottom.isStart) break
+            if(!isAvailable(bottom)) break
 
             const right = getNeighbor(bottom, 1, 0)
             if(right) right.parent = cell;
             if(right && right.isObstacle){
                 const rightBottom = getNeighbor(bottom, 1, 1)              
-                if(rightBottom && !rightBottom.isObstacle && !rightBottom.isClosed && !rightBottom.isOpen){
+                if(rightBottom && isAvailable(rightBottom)){
                     addToOpenList(bottom, cell)
                     addToOpenList(rightBottom, bottom)
-                    if(rightBottom.isFinish) {rightBottom.parent = right; return rightBottom}
+                    if(rightBottom.isFinish) return rightBottom
                 }
             }
 
             const left = getNeighbor(bottom, -1, 0)
             if(left && left.isObstacle){
                 const leftBottom = getNeighbor(bottom, -1, 1)              
-                if(leftBottom && !leftBottom.isObstacle && !leftBottom.isClosed && !leftBottom.isOpen){
+                if(leftBottom && isAvailable(leftBottom)){
                     addToOpenList(bottom, cell)
                     addToOpenList(leftBottom, bottom)
-                    if(leftBottom.isFinish) {leftBottom.parent = bottom; return leftBottom}
+                    if(leftBottom.isFinish) return leftBottom
                 }
             }
             bottom.isClosed = true
@@ -218,7 +223,7 @@ const Grid = ({size}:Props) => {
 
     const moveDiagonal = (cell: Cell) => {
         const tr = getNeighbor(cell, 1, -1)
-        if(tr && !tr.isObstacle && !tr.isClosed && !tr.isOpen && !tr.isStart){
+        if(tr && isAvailable(tr)){
             tr.direction = '/'
             tr.isClosed = true
             addToOpenList(tr, cell)
@@ -226,31 +231,32 @@ const Grid = ({size}:Props) => {
         }  
 
         const br = getNeighbor(cell, 1, 1)
-        if(br && !br.isObstacle && !br.isClosed && !br.isOpen && !br.isStart){
+        if(br && isAvailable(br)){
             br.direction = '\\'
             br.isClosed = true
             addToOpenList(br, cell)
-            if(br.isFinish) return tr
+            if(br.isFinish) return br
         }
 
         const tl = getNeighbor(cell, -1, -1)  
-        if(tl && !tl.isObstacle && !tl.isClosed && !tl.isOpen && !tl.isStart){
+        if(tl && isAvailable(tl)){
             tl.direction = '\\'
             tl.isClosed = true
             addToOpenList(tl, cell)
-            if(tl.isFinish) return tr
+            if(tl.isFinish) return tl
         }
 
         const bl = getNeighbor(cell, -1, 1)
-        if(bl && !bl.isObstacle && !bl.isClosed && !bl.isOpen && !bl.isStart){
+        if(bl && isAvailable(bl)){
             bl.direction = '/'
             bl.isClosed = true
             addToOpenList(bl, cell)
-            if(bl.isFinish) return tr
+            if(bl.isFinish) return bl
         }
     }
 
     const showPath = (cell: Cell) => {
+        cell.isPath = true
         let parent = cell.parent
         let i = 1
         while(i < size*size){
