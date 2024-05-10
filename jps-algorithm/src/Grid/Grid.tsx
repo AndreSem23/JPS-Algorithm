@@ -31,7 +31,6 @@ const Grid = ({size}:Props) => {
                     isFinish: false,
                     isPath: false,
                     gScore: 0,
-                    hScore: 99999,
                     fScore: 99999,
                     parent: null,
                     direction: ''
@@ -64,36 +63,40 @@ const Grid = ({size}:Props) => {
     }
 
     const calculateCost = (cell:Cell) => {
-        if(!start || !finish) return 99999
-        if(cell.isObstacle && cell.isClosed && cell.isOpen) return 9999
-        const g = cell.parent ? cell.parent.gScore + 1 : 0
+        if(!start || !finish) return
+        if(cell.isObstacle && cell.isClosed && cell.isOpen) return
+        const g = cell.parent ? cell.parent.gScore + 1 : 1
         cell.gScore = g
         const h = ((cell.x - finish.x)**2 + (cell.y - finish.y)**2)**0.5
-        cell.hScore = h
         return Math.round((g + h)*100)/100
     }
 
     const addToOpenList = (cell:Cell,  parent: Cell) => {
         const f = calculateCost(cell);
+        if(!f) return
         cell.parent = parent
         cell.fScore = f
         cell.isOpen = true
         openList.enqueue(cell, -f)
     }
 
+    const getNeighbor = (cell: Cell, xDir: number, yDir: number) => {
+        const neighbor = grid.find(f => f.y === cell.y + yDir)?.cells.find(c => c.x === cell.x + xDir)
+        return neighbor
+    }
+
     const searchHorizontaly = (cell:Cell) => {
         let step = 1
         while (true){
-            // eslint-disable-next-line no-loop-func
-            const right = grid.find(f => f.y === cell.y)?.cells.find(c => c.x === cell.x + step)
+            const right = getNeighbor(cell,step,0)
             if(!right) break
             right.parent = cell
             if(right.isFinish) return right
             if(right.isClosed || right.isOpen || right.isObstacle || right.isStart) break
 
-            const top = grid.find(f => f.y === right.y-1)?.cells.find(c => c.x === right.x)
+            const top = getNeighbor(right, 0, -1)
             if(top && top.isObstacle){
-                const topRight = grid.find(f => f.y === right.y-1)?.cells.find(c => c.x === right.x+1)                
+                const topRight = getNeighbor(right,1,-1)            
                 if(topRight && !topRight.isObstacle && !topRight.isClosed && !topRight.isOpen){
                     addToOpenList(right, cell)
                     addToOpenList(topRight, right)
@@ -101,9 +104,9 @@ const Grid = ({size}:Props) => {
                 }
             }
 
-            const bottom = grid.find(f => f.y === right.y+1)?.cells.find(c => c.x === right.x)
+            const bottom = getNeighbor(right,0,1)
             if(bottom && bottom.isObstacle){
-                const bottomRight = grid.find(f => f.y === right.y+1)?.cells.find(c => c.x === right.x+1)
+                const bottomRight = getNeighbor(right,1,1)
                 if(bottomRight && !bottomRight.isObstacle && !bottomRight.isClosed && !bottomRight.isOpen){
                     addToOpenList(right, cell) 
                     addToOpenList(bottomRight, right)
@@ -116,16 +119,15 @@ const Grid = ({size}:Props) => {
         }
         let stepBack = 1
         while (true){
-            // eslint-disable-next-line no-loop-func
-            const left = grid.find(f => f.y === cell.y)?.cells.find(c => c.x === cell.x - stepBack)
+            const left = getNeighbor(cell, -stepBack, 0)
             if(!left) break
             left.parent = cell
             if(left.isFinish)  return left
             if(left.isClosed || left.isOpen || left.isObstacle || left.isStart) break
 
-            const top = grid.find(f => f.y === left.y-1)?.cells.find(c => c.x === left.x)
+            const top = getNeighbor(left,0,-1)
             if(top && top.isObstacle){
-                const topLeft = grid.find(f => f.y === left.y-1)?.cells.find(c => c.x === left.x-1)
+                const topLeft = getNeighbor(left, -1, -1)
                 if(topLeft && !topLeft.isObstacle && !topLeft.isClosed && !topLeft.isOpen){
                     addToOpenList(left, cell) 
                     addToOpenList(topLeft, left)
@@ -133,9 +135,9 @@ const Grid = ({size}:Props) => {
                 }
             }
 
-            const bottom = grid.find(f => f.y === left.y+1)?.cells.find(c => c.x === left.x)
+            const bottom = getNeighbor(left, 0, 1)
             if(bottom && bottom.isObstacle){
-                const bottomLeft = grid.find(f => f.y === left.y+1)?.cells.find(c => c.x === left.x-1)
+                const bottomLeft = getNeighbor(left, -1, 1)
                 if(bottomLeft && !bottomLeft.isObstacle && !bottomLeft.isClosed && !bottomLeft.isOpen){
                     addToOpenList(left, cell) 
                     addToOpenList(bottomLeft, left)
@@ -151,16 +153,15 @@ const Grid = ({size}:Props) => {
     const searchVertically = (cell:Cell) => {        
         let stepUp = 1
         while (true){
-            // eslint-disable-next-line no-loop-func
-            const top = grid.find(f => f.y === cell.y-stepUp)?.cells.find(c => c.x === cell.x)            
+            const top = getNeighbor(cell, 0, -stepUp)      
             if(!top) break
             top.parent = cell
             if(top.isFinish)  return top
             if(top.isClosed || top.isOpen || top.isObstacle || top.isStart) break
 
-            const right = grid.find(f => f.y === top.y)?.cells.find(c => c.x === top.x+1)
+            const right = getNeighbor(top, 1, 0)
             if(right && right.isObstacle){
-                const rightTop = grid.find(f => f.y === top.y-1)?.cells.find(c => c.x === top.x+1)
+                const rightTop = getNeighbor(top, 1, -1)
                 if(rightTop && !rightTop.isObstacle && !rightTop.isClosed && !rightTop.isOpen){
                     addToOpenList(top, cell)
                     addToOpenList(rightTop, top)
@@ -168,9 +169,9 @@ const Grid = ({size}:Props) => {
                 }
             }
 
-            const left = grid.find(f => f.y === top.y)?.cells.find(c => c.x === top.x-1)
+            const left = getNeighbor(top, -1, 0)
             if(left && left.isObstacle){
-                const leftTop = grid.find(f => f.y === top.y-1)?.cells.find(c => c.x === top.x-1)
+                const leftTop = getNeighbor(top, -1, -1)
                 if(leftTop && !leftTop.isObstacle && !leftTop.isClosed && !leftTop.isOpen){
                     addToOpenList(top, cell)
                     addToOpenList(leftTop, top)
@@ -183,17 +184,16 @@ const Grid = ({size}:Props) => {
         }
         let stepDown = 1
         while (true){
-            // eslint-disable-next-line no-loop-func
-            const bottom = grid.find(f => f.y === cell.y+stepDown)?.cells.find(c => c.x === cell.x)
+            const bottom = getNeighbor(cell, 0, stepDown)
             if(!bottom) break
             bottom.parent = cell
             if(bottom.isFinish)  return bottom
             if(bottom.isClosed || bottom.isOpen || bottom.isObstacle || bottom.isStart) break
 
-            const right = grid.find(f => f.y === bottom.y)?.cells.find(c => c.x === bottom.x + 1)
+            const right = getNeighbor(bottom, 1, 0)
             if(right) right.parent = cell;
             if(right && right.isObstacle){
-                const rightBottom = grid.find(f => f.y === bottom.y+1)?.cells.find(c => c.x === bottom.x+1)                
+                const rightBottom = getNeighbor(bottom, 1, 1)              
                 if(rightBottom && !rightBottom.isObstacle && !rightBottom.isClosed && !rightBottom.isOpen){
                     addToOpenList(bottom, cell)
                     addToOpenList(rightBottom, bottom)
@@ -201,9 +201,9 @@ const Grid = ({size}:Props) => {
                 }
             }
 
-            const left = grid.find(f => f.y === bottom.y)?.cells.find(c => c.x === bottom.x-1)
+            const left = getNeighbor(bottom, -1, 0)
             if(left && left.isObstacle){
-                const leftBottom = grid.find(f => f.y === bottom.y+1)?.cells.find(c => c.x === bottom.x-1)                
+                const leftBottom = getNeighbor(bottom, -1, 1)              
                 if(leftBottom && !leftBottom.isObstacle && !leftBottom.isClosed && !leftBottom.isOpen){
                     addToOpenList(bottom, cell)
                     addToOpenList(leftBottom, bottom)
@@ -217,111 +217,85 @@ const Grid = ({size}:Props) => {
     }
 
     const moveDiagonal = (cell: Cell) => {
-        const tr = grid.find(f => f.y === cell.y-1)?.cells.find(c => c.x === cell.x+1) 
-        const tl = grid.find(f => f.y === cell.y-1)?.cells.find(c => c.x === cell.x-1)   
-        const br = grid.find(f => f.y === cell.y+1)?.cells.find(c => c.x === cell.x+1)
-        const bl = grid.find(f => f.y === cell.y+1)?.cells.find(c => c.x === cell.x-1)
-        let f_tr = 99999
-        let f_tl = 99999
-        let f_br = 99999
-        let f_bl = 99999
-        if(tr) f_tr = calculateCost(tr)
-        if(tl) f_tl = calculateCost(tl)
-        if(br) f_br = calculateCost(br)
-        if(bl) f_bl = calculateCost(bl)
-        
-        //right
-        if(f_tr < f_tl){
-            //top
-            if(f_tr < f_br){
-                const topRight = grid.find(f => f.y === cell.y-1)?.cells.find(c => c.x === cell.x+1)                
-                if(topRight && !topRight.isObstacle && !topRight.isClosed && !topRight.isOpen){
-                    topRight.direction = '/'
-                    topRight.isClosed = true
-                    addToOpenList(topRight, cell)
-                    return topRight
-                }   
-            }
-            //bottom
-            else{
-                const bottomRight = grid.find(f => f.y === cell.y+1)?.cells.find(c => c.x === cell.x+1)                
-                if(bottomRight && !bottomRight.isObstacle && !bottomRight.isClosed && !bottomRight.isOpen){
-                    bottomRight.direction = '\\'
-                    bottomRight.isClosed = true
-                    addToOpenList(bottomRight, cell)
-                    return bottomRight
-                }
-            }
-        }        
-        //left
-        else{
-            //top
-            if(f_tl < f_bl){
-                const topLeft = grid.find(f => f.y === cell.y-1)?.cells.find(c => c.x === cell.x-1)                
-                if(topLeft && !topLeft.isObstacle && !topLeft.isClosed && !topLeft.isOpen){
-                    topLeft.direction = '\\'
-                    topLeft.isClosed = true
-                    addToOpenList(topLeft, cell)
-                    return topLeft
-                }
-            }
-            //bottom
-            else{
-                const bottomLeft = grid.find(f => f.y === cell.y+1)?.cells.find(c => c.x === cell.x-1)                
-                if(bottomLeft && !bottomLeft.isObstacle && !bottomLeft.isClosed && !bottomLeft.isOpen){
-                    bottomLeft.direction = '/'
-                    bottomLeft.isClosed = true
-                    addToOpenList(bottomLeft, cell)
-                    return bottomLeft
-                }
-            }
-        }        
+        const tr = getNeighbor(cell, 1, -1)
+        if(tr && !tr.isObstacle && !tr.isClosed && !tr.isOpen && !tr.isStart){
+            tr.direction = '/'
+            tr.isClosed = true
+            addToOpenList(tr, cell)
+            if(tr.isFinish) return tr
+        }  
+
+        const br = getNeighbor(cell, 1, 1)
+        if(br && !br.isObstacle && !br.isClosed && !br.isOpen && !br.isStart){
+            br.direction = '\\'
+            br.isClosed = true
+            addToOpenList(br, cell)
+            if(br.isFinish) return tr
+        }
+
+        const tl = getNeighbor(cell, -1, -1)  
+        if(tl && !tl.isObstacle && !tl.isClosed && !tl.isOpen && !tl.isStart){
+            tl.direction = '\\'
+            tl.isClosed = true
+            addToOpenList(tl, cell)
+            if(tl.isFinish) return tr
+        }
+
+        const bl = getNeighbor(cell, -1, 1)
+        if(bl && !bl.isObstacle && !bl.isClosed && !bl.isOpen && !bl.isStart){
+            bl.direction = '/'
+            bl.isClosed = true
+            addToOpenList(bl, cell)
+            if(bl.isFinish) return tr
+        }
     }
 
     const showPath = (cell: Cell) => {
-        if(cell.isStart) return
-        cell.isPath = true
-        if(!cell.parent) return
-        showPath(cell.parent)
+        let parent = cell.parent
+        let i = 1
+        while(i < size*size){
+            i += 1
+            if(!parent || parent.isStart) break
+            parent.isPath = true
+            let new_parent = parent.parent
+            parent = new_parent
+        }
     }
 
     const algo = () => {
         if(!start || !finish) return        
 
-        //init, add all 8 neighbors for the start node
-        const leftTop = grid.find(f => f.y === start.y - 1)?.cells.find(c => c.x === start.x - 1)
+        const leftTop = getNeighbor(start, -1, -1)
         if(leftTop) addToOpenList(leftTop, start)
-        const top = grid.find(f => f.y === start.y - 1)?.cells.find(c => c.x === start.x)
+        const top = getNeighbor(start, 0, -1)
         if(top) addToOpenList(top, start)
-        const rightTop = grid.find(f => f.y === start.y - 1)?.cells.find(c => c.x === start.x + 1)
+        const rightTop = getNeighbor(start, 1, -1)
         if(rightTop) addToOpenList(rightTop, start)
 
-        const left = grid.find(f => f.y === start.y)?.cells.find(c => c.x === start.x - 1)
+        const left = getNeighbor(start, -1, 0)
         if(left) addToOpenList(left, start)
-        const right = grid.find(f => f.y === start.y)?.cells.find(c => c.x === start.x + 1)
+        const right = getNeighbor(start, 1, 0)
         if(right) addToOpenList(right, start)
 
-        const leftBottom = grid.find(f => f.y === start.y + 1)?.cells.find(c => c.x === start.x - 1)
+        const leftBottom = getNeighbor(start, -1, 1)
         if(leftBottom) addToOpenList(leftBottom, start)
-        const bottom = grid.find(f => f.y === start.y + 1)?.cells.find(c => c.x === start.x)
+        const bottom = getNeighbor(start, 0, 1)
         if(bottom) addToOpenList(bottom, start)
-        const rightBottom = grid.find(f => f.y === start.y + 1)?.cells.find(c => c.x === start.x + 1)
+        const rightBottom = getNeighbor(start, 1, 1)
         if(rightBottom) addToOpenList(rightBottom, start)
 
         let result : Cell | undefined = undefined
         while (!openList.isEmpty()){
             let node = openList.dequeue()            
+            if(!node) break         
 
-            while(true) {
-                if(!node) break         
-                result = searchHorizontaly(node)
-                if(result) break
-                result = searchVertically(node)
-                if(result) break
-                let point = moveDiagonal(node)
-                if(point && point.isFinish) {point.parent = node; result = point; break}
-                node = point
-            }
+            result = searchHorizontaly(node)
+            if(result) break
+
+            result = searchVertically(node)
+            if(result) break
+
+            result = moveDiagonal(node)
             if(result) break
         }
         alert(result ? 'Success' : 'Not found')
